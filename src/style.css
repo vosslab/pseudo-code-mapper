@@ -1,0 +1,607 @@
+/* style.css - base layout and design tokens for Concept Map Maker */
+
+/* ============================================================
+   Design tokens: From/To tints (shared by table columns and map highlights)
+   ============================================================ */
+:root {
+  /* From column: soft blue */
+  --from-tint: #cfe8ff;
+  --from-accent: #5aabff;
+
+  /* To column: soft amber */
+  --to-tint: #ffe2b8;
+  --to-accent: #e8990a;
+
+  /* Layout constants */
+  --toolbar-height: 48px;
+  --rubric-height: 140px;
+  --editor-ratio: 40%;
+  --gap: 8px;
+  --pad: 12px;
+  --radius: 4px;
+
+  /* Typography */
+  --font-stack: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-size-base: 15px;
+  --color-bg: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-border: #d0d0d0;
+  --color-heading: #222222;
+  --color-muted: #666666;
+  --color-tab-active: #1a73e8;
+}
+
+/* ============================================================
+   Reset and base
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-stack);
+  font-size: var(--font-size-base);
+  background: var(--color-bg);
+  color: var(--color-heading);
+}
+
+#app {
+  height: 100%;
+}
+
+/* ============================================================
+   App shell grid: toolbar / main area / rubric panel
+   ============================================================ */
+.app-shell {
+  display: grid;
+  grid-template-rows: var(--toolbar-height) 1fr var(--rubric-height);
+  grid-template-columns: 1fr;
+  height: 100%;
+  gap: 0;
+}
+
+/* ============================================================
+   Toolbar strip
+   ============================================================ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--pad);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--gap);
+}
+
+.toolbar-content {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.toolbar-title-input {
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-width: 160px;
+  max-width: 280px;
+}
+
+.toolbar-title-input:focus {
+  outline: 2px solid var(--from-accent);
+  outline-offset: 1px;
+}
+
+.toolbar-btn {
+  font-size: 13px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+  background: var(--color-border);
+}
+
+.toolbar-btn-danger {
+  color: #c0392b;
+}
+
+.toolbar-autosave-status {
+  font-size: 11px;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.toolbar-open-error {
+  font-size: 12px;
+  color: #c0392b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.toolbar-btn-dismiss {
+  font-size: 11px;
+  padding: 1px 5px;
+  border: 1px solid #c0392b;
+  border-radius: 3px;
+  background: transparent;
+  color: #c0392b;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+/* ============================================================
+   Main area: editor (left) + map (right)
+   ============================================================ */
+.main-area {
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  gap: var(--gap);
+  padding: var(--gap);
+}
+
+/* ============================================================
+   Editor pane (~40% width)
+   ============================================================ */
+.editor-pane {
+  flex: 0 0 var(--editor-ratio);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 2px solid var(--color-border);
+  padding: 0 var(--pad);
+  gap: 0;
+}
+
+.tab {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-stack);
+  font-size: var(--font-size-base);
+  color: var(--color-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: var(--color-heading);
+}
+
+.tab-active {
+  color: var(--color-tab-active);
+  border-bottom-color: var(--color-tab-active);
+  font-weight: 600;
+}
+
+/* Tab panels */
+[role="tabpanel"] {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--pad);
+}
+
+/* ============================================================
+   Map pane (~60% remaining width)
+   ============================================================ */
+.map-pane {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  padding: var(--pad);
+}
+
+/* Map pane header: heading on the left, theme picker on the right. */
+.map-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+
+/* ============================================================
+   Theme picker (shape + palette controls in the map pane corner)
+   ============================================================ */
+.theme-picker {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.theme-picker-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.theme-picker-label {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.theme-picker-select {
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+/* ============================================================
+   Rubric panel (bottom strip)
+   ============================================================ */
+.rubric-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding: var(--pad);
+  overflow-y: auto;
+}
+
+/* ============================================================
+   Shared pane elements
+   ============================================================ */
+.pane-heading {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+/* ============================================================
+   Triples table
+   ============================================================ */
+.triples-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--pad);
+}
+
+.triples-meta {
+  font-size: 12px;
+  color: var(--color-muted);
+  padding: 2px 0 4px 0;
+}
+
+/* Header row: sentence-shaped column labels */
+.triples-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.header-cell {
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.header-arrow {
+  text-align: center;
+  color: var(--color-muted);
+}
+
+/* Each data row mirrors the header grid */
+.triple-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.triple-cell {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.triple-cell:focus {
+  outline: 2px solid var(--from-accent);
+  outline-offset: 1px;
+}
+
+.triple-cell-to:focus {
+  outline-color: var(--to-accent);
+}
+
+.triple-arrow {
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 14px;
+  user-select: none;
+}
+
+.triple-delete-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.triple-delete-btn:hover {
+  border-color: var(--color-border);
+  background: #ffeaea;
+  color: #b00000;
+}
+
+/* Proposition preview: shown below the focused row */
+.triple-preview {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: var(--color-muted);
+  padding: 2px 4px;
+  font-style: italic;
+}
+
+.triples-add-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+}
+
+.triples-add-btn:hover {
+  background: var(--from-tint);
+}
+
+/* ============================================================
+   Print stylesheet
+   ============================================================ */
+@media print {
+  /* Reset page to plain white */
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  #app {
+    height: auto;
+  }
+
+  /* App shell: switch from grid to simple block flow */
+  .app-shell {
+    display: block;
+    height: auto;
+  }
+
+  /* Hide interactive chrome */
+  .toolbar,
+  .rubric-panel,
+  .editor-pane {
+    display: none !important;
+  }
+
+  /* Main area: stack vertically, full width */
+  .main-area {
+    display: block;
+    padding: 0;
+    gap: 0;
+    overflow: visible;
+  }
+
+  /* Map pane: full page width, auto height, no clipping */
+  .map-pane {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    page-break-inside: avoid;
+  }
+
+  /* SVG inside the map pane scales to full page width */
+  .map-pane svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Definitions panel: force visible even when Triples tab is active.
+     The [hidden] attribute sets display:none; override it here so the
+     definitions always appear below the map regardless of active tab. */
+  #panel-definitions {
+    display: block !important;
+    overflow: visible;
+    height: auto;
+    padding: 0;
+    margin-top: 16px;
+    page-break-before: auto;
+  }
+
+  /* Hide the Triples panel in print (definitions only) */
+  #panel-triples {
+    display: none !important;
+  }
+
+  /* Definitions heading */
+  #panel-definitions .pane-heading {
+    font-size: 14px;
+    color: #000000;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+  }
+
+  /* Definitions table: flowing layout, black text */
+  .definitions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    color: #000000;
+  }
+
+  .definitions-table th,
+  .definitions-table td {
+    border: 1px solid #888888;
+    padding: 4px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .definitions-table th {
+    background: #e8e8e8;
+    font-weight: 700;
+  }
+
+  /* Suppress tab bar (already hidden via editor-pane, but be explicit) */
+  .tab-bar {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   Rubric checklist
+   ============================================================ */
+.rubric-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+/* Base row */
+.rubric-item {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Clickable rows get a pointer cursor and focus ring */
+.rubric-item--clickable {
+  cursor: pointer;
+}
+
+.rubric-item--clickable:hover .rubric-message {
+  text-decoration: underline;
+}
+
+.rubric-item--clickable:focus {
+  outline: 2px solid var(--from-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Status marker chip: bold, fixed-width-ish label */
+.rubric-marker {
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Level-specific colors: pass=green, warn=amber, fail=red, hint=muted */
+.rubric-item--pass .rubric-marker {
+  background: #d4edda;
+  color: #155724;
+}
+
+.rubric-item--warn .rubric-marker {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.rubric-item--fail .rubric-marker {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.rubric-item--hint .rubric-marker {
+  background: #e9ecef;
+  color: var(--color-muted);
+}
+
+/* Hint rows are visually subdued so they do not look like failures */
+.rubric-item--hint {
+  opacity: 0.7;
+}
+
+.rubric-message {
+  color: var(--color-heading);
+}
+
+.rubric-item--hint .rubric-message {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+/* Cross-highlight: a triple row glows when a hovered bubble or edge
+   references it (the node/edge -> row direction). A left accent bar plus a
+   soft tint reads as "this is one of the matching rows" without competing
+   with the focus outline. */
+.triple-row.highlighted {
+  background: var(--from-tint);
+  box-shadow: inset 3px 0 0 0 var(--from-accent);
+  border-radius: var(--radius);
+}

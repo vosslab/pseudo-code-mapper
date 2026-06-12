@@ -11,7 +11,7 @@
 #     aborts with an actionable error if missing.
 #   - Verifies src/index.html references dist/main.js with a module script
 #     tag (warns if missing -- the page will load but main.js is dead).
-#   - Bundles the entry into dist/main.js via 'node tools/build.mjs'
+#   - Bundles the entry into dist/main.js via 'node pipeline/build.mjs'
 #     (esbuild JS API + esbuild-plugin-solid; minified, sourcemap, ESM).
 #   - Copies src/index.html and src/style.css into dist/.
 #   - Writes dist/.nojekyll so GitHub Pages serves files starting with _.
@@ -62,7 +62,7 @@ mkdir -p dist
 npx tsc --noEmit -p tsconfig.json
 
 # Bundle via esbuild JS API (supports esbuild-plugin-solid).
-node tools/build.mjs
+node pipeline/build.mjs
 
 test -f dist/index.html
 test -f dist/main.js

@@ -1,12 +1,11 @@
-#!/usr/bin/env node
-// tools/build.mjs - esbuild JS API bundler for the Concept Map Maker app.
+// pipeline/build.mjs - esbuild JS API bundler for the Concept Map Maker app.
 //
 // Uses esbuild-plugin-solid (Babel transform) to compile SolidJS JSX.
 // The esbuild CLI does not support plugins, so the JS API is required.
 //
 // Usage:
-//   node tools/build.mjs           # one-shot production build (minified)
-//   node tools/build.mjs --watch   # watch + serve mode (no minify, port 3000)
+//   node pipeline/build.mjs           # one-shot production build (minified)
+//   node pipeline/build.mjs --watch   # watch + serve mode (no minify, port 3000)
 //
 // Outputs: dist/main.js, dist/main.js.map, dist/index.html, dist/style.css,
 //          dist/.nojekyll
