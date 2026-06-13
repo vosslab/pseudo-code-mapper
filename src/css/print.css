@@ -1,0 +1,73 @@
+/* print.css - @media print overrides for printing the map */
+
+/* ============================================================
+   Print stylesheet
+   ============================================================ */
+@media print {
+  /* Reset page to plain white */
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  #app {
+    height: auto;
+  }
+
+  /* App shell: switch from grid to simple block flow */
+  .app-shell {
+    display: block;
+    height: auto;
+  }
+
+  /* Hide interactive chrome */
+  .toolbar,
+  .rubric-panel,
+  .editor-pane {
+    display: none !important;
+  }
+
+  /* Main area: stack vertically, full width */
+  .main-area {
+    display: block;
+    padding: 0;
+    gap: 0;
+    overflow: visible;
+  }
+
+  /* Map pane: full page width, auto height, no clipping */
+  .map-pane {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    page-break-inside: avoid;
+  }
+
+  /* SVG inside the map pane scales to full page width */
+  .map-pane svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Force light chrome tokens when printing, regardless of data-ui-theme.
+     Values mirror :root defaults in tokens.css; update both together if light
+     palette changes. The [data-ui-theme="dark"] selector wins over :root on
+     screen, so we need to re-assert on both targets here. */
+  :root,
+  [data-ui-theme="dark"] {
+    --color-bg: #f5f5f5;
+    --color-surface: #ffffff;
+    --color-border: #d0d0d0;
+    --color-heading: #222222;
+    --color-muted: #666666;
+    --color-text: #222222;
+  }
+}

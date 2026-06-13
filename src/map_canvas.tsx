@@ -27,6 +27,7 @@ import type { NodeBox, EdgeTriple } from "./edge_geometry";
 import { assign_curvatures } from "./edge_geometry";
 import { effective_extent } from "./map_bounds";
 import { ConceptEdge, ARROW_MARKER_ID, ARROW_HIGHLIGHT_MARKER_ID } from "./concept_edge";
+import { map_is_dark } from "./ui_theme";
 
 // Padding (in map units) added around the laid-out content when computing the
 // initial viewBox, so bubbles and arrowheads near the edge are not clipped.
@@ -39,8 +40,13 @@ const ZOOM_STEP = 1.0015;
 
 // Marker geometry. The arrowhead is a small triangle drawn in marker space and
 // oriented along the path direction; the two ids differ only in fill color.
+// These match the edge stroke colors in concept_edge.tsx so the arrowhead and
+// its path read as one. Dark-mode screen variants keep them light enough to see
+// on a dark pane; export forces light (map_is_dark() returns false on export).
 const ARROW_COLOR = "#6a6a6a";
 const ARROW_HIGHLIGHT_COLOR = "#1565c0";
+const ARROW_COLOR_DARK = "#9a9a9a";
+const ARROW_HIGHLIGHT_COLOR_DARK = "#5aabff";
 
 // The ephemeral pan/zoom viewport transform. scale is uniform; tx/ty are the
 // translation in screen-space applied after scaling. This is render state only;
@@ -174,6 +180,12 @@ export function MapCanvas(props: MapCanvasProps): JSX.Element {
 
   // resolved render boxes for every placed concept (override or layout center)
   const node_boxes = (): Map<ConceptKey, NodeBox> => build_node_boxes(props.state);
+
+  // arrowhead marker fills, switched on the resolved map theme so they match the
+  // edge stroke colors. Export forces light via map_is_dark() returning false.
+  const arrow_fill = (): string => (map_is_dark() ? ARROW_COLOR_DARK : ARROW_COLOR);
+  const arrow_highlight_fill = (): string =>
+    map_is_dark() ? ARROW_HIGHLIGHT_COLOR_DARK : ARROW_HIGHLIGHT_COLOR;
 
   // the initial (untransformed) viewBox from the rendered extent plus padding;
   // the viewport <g> transform pans/zooms within this fixed coordinate space
@@ -310,7 +322,7 @@ export function MapCanvas(props: MapCanvasProps): JSX.Element {
           markerHeight={7}
           orient="auto-start-reverse"
         >
-          <path d="M 0 0 L 10 5 L 0 10 z" fill={ARROW_COLOR} />
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={arrow_fill()} />
         </marker>
         <marker
           id={ARROW_HIGHLIGHT_MARKER_ID}
@@ -321,7 +333,7 @@ export function MapCanvas(props: MapCanvasProps): JSX.Element {
           markerHeight={7}
           orient="auto-start-reverse"
         >
-          <path d="M 0 0 L 10 5 L 0 10 z" fill={ARROW_HIGHLIGHT_COLOR} />
+          <path d="M 0 0 L 10 5 L 0 10 z" fill={arrow_highlight_fill()} />
         </marker>
       </defs>
 

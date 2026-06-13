@@ -8,7 +8,8 @@
 import { For } from "solid-js";
 import type { JSX } from "solid-js";
 
-import { SHAPE_REGISTRY, PALETTES } from "./themes";
+import { SHAPE_REGISTRY } from "./themes";
+import { PALETTES } from "./palettes";
 import type { AppState } from "./app_state";
 import type { ThemeShape, ThemePalette } from "./types";
 

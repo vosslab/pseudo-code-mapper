@@ -12,6 +12,7 @@ import { ConceptNode } from "./concept_node";
 import { ThemePicker } from "./theme_picker";
 import { RubricPanel } from "./rubric_panel";
 import { Toolbar } from "./toolbar";
+import { setup_map_theme, set_exporting_light } from "./ui_theme";
 
 // ============================================
 // Resizer constants
@@ -83,6 +84,13 @@ export function App(): JSX.Element {
   const storage = browser_storage();
   const state: AppState = create_app_state(storage);
 
+  // Wire the resolved map-theme MutationObserver (data-ui-theme attribute)
+  // under this component's owner so onCleanup runs if the shell unmounts. The
+  // map color accessors read map_is_dark() from ui_theme.ts to switch on-screen
+  // colors for dark mode. No matchMedia live listener -- the theme is two-state
+  // only and only changes when the user clicks the toggle.
+  setup_map_theme();
+
   // svg_el: capture the live <svg> element from MapCanvas so Toolbar can pass
   // it to export_svg functions. Null until MapCanvas mounts.
   const [svg_el, set_svg_el] = createSignal<SVGSVGElement | null>(null);
@@ -107,6 +115,18 @@ export function App(): JSX.Element {
     resizer_el = el;
   };
 
+  // Print force-light handlers: before printing, force the map to render in
+  // light colors so inline SVG attributes resolve light (same flag used by
+  // export). After printing, release the override so the on-screen theme is
+  // restored. This covers both the toolbar Print button (which calls
+  // window.print(), triggering beforeprint) and the browser's native Cmd/Ctrl+P.
+  function on_before_print(): void {
+    set_exporting_light(true);
+  }
+  function on_after_print(): void {
+    set_exporting_light(false);
+  }
+
   // on mount: load persisted ratio and apply.
   onMount(() => {
     // Resizer ratio: load, persist corrected value, apply CSS property.
@@ -116,6 +136,13 @@ export function App(): JSX.Element {
     set_editor_ratio(ratio);
     if (main_el !== null) {
       apply_ratio(main_el, ratio);
+    }
+
+    // Register print force-light listeners under this component's owner so they
+    // are cleaned up on unmount. Guard for non-browser (JSDOM / SSR).
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeprint", on_before_print);
+      window.addEventListener("afterprint", on_after_print);
     }
   });
 
@@ -207,9 +234,13 @@ export function App(): JSX.Element {
     commit_ratio(RATIO_DEFAULT);
   }
 
-  // Clean up body class if the component ever unmounts.
+  // Clean up body class and print listeners if the component ever unmounts.
   onCleanup(() => {
     document.body.classList.remove("resizer-active");
+    if (typeof window !== "undefined") {
+      window.removeEventListener("beforeprint", on_before_print);
+      window.removeEventListener("afterprint", on_after_print);
+    }
   });
 
   return (

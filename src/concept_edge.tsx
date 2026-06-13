@@ -21,6 +21,7 @@ import type { Triple, ThemeShape } from "./types";
 import { concept_key } from "./types";
 import type { NodeBox, EdgeGeometry } from "./edge_geometry";
 import { edge_path, self_loop_path } from "./edge_geometry";
+import { map_is_dark } from "./ui_theme";
 
 // Marker ids defined once in the canvas <defs>; referenced by concept edges via
 // marker-end. Exported so map_canvas owns the matching <marker> elements and the
@@ -34,6 +35,14 @@ export const ARROW_HIGHLIGHT_MARKER_ID = "cmap-arrow-highlight";
 const EDGE_COLOR = "#6a6a6a";
 const EDGE_ACCENT_COLOR = "#1565c0";
 
+// Dark-mode screen variants. These apply ONLY to the on-screen map when the
+// resolved UI theme is dark; export always forces light (map_is_dark() returns
+// false during export), so the exported SVG/PNG uses the light constants above.
+// Edge stroke is lightened so it reads against a dark pane; the highlight accent
+// is brightened for the same reason.
+const EDGE_COLOR_DARK = "#9a9a9a";
+const EDGE_ACCENT_COLOR_DARK = "#5aabff";
+
 // Stroke widths: edges are thin normally and thicken slightly when highlighted.
 const EDGE_WIDTH = 1.5;
 const EDGE_HIGHLIGHT_WIDTH = 2.5;
@@ -44,8 +53,15 @@ const LABEL_FONT_FAMILY = "Helvetica, Arial, sans-serif";
 const LABEL_FONT_SIZE = "12";
 const LABEL_COLOR = "#2a2a2a";
 
-// Width of the white halo painted behind label glyphs (via paint-order: stroke)
-// so verb text stays legible where it crosses an edge or a bubble.
+// Dark-mode screen variants for the verb label. The light halo ("#ffffff") is
+// the white box behind the verb text; on a dark pane it looks broken, so in dark
+// mode the halo becomes the dark surface color and the text becomes light.
+const LABEL_COLOR_DARK = "#e0e0e0";
+const LABEL_HALO_COLOR = "#ffffff";
+const LABEL_HALO_COLOR_DARK = "#1e1e1e";
+
+// Width of the halo painted behind label glyphs (via paint-order: stroke) so
+// verb text stays legible where it crosses an edge or a bubble.
 const LABEL_HALO_WIDTH = 4;
 
 // Props for one edge. The canvas passes the shared AppState plus the triple, the
@@ -87,8 +103,13 @@ export function ConceptEdge(props: ConceptEdgeProps): JSX.Element {
   const is_highlighted = (): boolean => props.state.highlighted_triples().has(props.triple.id);
 
   // inline stroke and width switch on highlight; the highlight marker recolors
-  // the arrowhead to match the accented path
-  const stroke_color = (): string => (is_highlighted() ? EDGE_ACCENT_COLOR : EDGE_COLOR);
+  // the arrowhead to match the accented path. Colors switch on the resolved
+  // map theme: dark mode uses lighter variants, light mode is unchanged.
+  const base_color = (): string => (map_is_dark() ? EDGE_COLOR_DARK : EDGE_COLOR);
+  const accent_color = (): string => (map_is_dark() ? EDGE_ACCENT_COLOR_DARK : EDGE_ACCENT_COLOR);
+  const label_text_color = (): string => (map_is_dark() ? LABEL_COLOR_DARK : LABEL_COLOR);
+  const label_halo_color = (): string => (map_is_dark() ? LABEL_HALO_COLOR_DARK : LABEL_HALO_COLOR);
+  const stroke_color = (): string => (is_highlighted() ? accent_color() : base_color());
   const stroke_width = (): number => (is_highlighted() ? EDGE_HIGHLIGHT_WIDTH : EDGE_WIDTH);
   const marker = (): string =>
     is_highlighted() ? `url(#${ARROW_HIGHLIGHT_MARKER_ID})` : `url(#${ARROW_MARKER_ID})`;
@@ -130,8 +151,8 @@ export function ConceptEdge(props: ConceptEdgeProps): JSX.Element {
           dominant-baseline="middle"
           font-family={LABEL_FONT_FAMILY}
           font-size={LABEL_FONT_SIZE}
-          fill={is_highlighted() ? EDGE_ACCENT_COLOR : LABEL_COLOR}
-          stroke="#ffffff"
+          fill={is_highlighted() ? accent_color() : label_text_color()}
+          stroke={label_halo_color()}
           stroke-width={LABEL_HALO_WIDTH}
           paint-order="stroke"
           pointer-events="none"

@@ -4,7 +4,8 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { PALETTES, depth_fill, ORIGIN_EMPHASIS, SHAPE_REGISTRY } from "../src/themes.js";
+import { PALETTES, depth_fill } from "../src/palettes.js";
+import { ORIGIN_EMPHASIS, SHAPE_REGISTRY } from "../src/themes.js";
 
 //============================================
 // PALETTES

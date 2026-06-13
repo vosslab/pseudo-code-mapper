@@ -14,6 +14,7 @@ import type { AppState } from "./app_state";
 import type { ConceptKey } from "./types";
 import type { NodeBox } from "./edge_geometry";
 import { effective_extent } from "./map_bounds";
+import { set_exporting_light } from "./ui_theme";
 
 // Padding added around the rendered extent in the exported viewBox so labels
 // and arrowheads near the edge are not clipped.
@@ -100,11 +101,28 @@ function strip_interactive_attrs(root: Element): void {
 export async function export_svg_text(svg: SVGSVGElement, state: AppState): Promise<string> {
   // clear hover so the export captures neutral styling
   state.set_hover({ source: null, tripleId: null, conceptKey: null });
-  // let Solid reactivity flush the hover change before we snapshot the DOM
-  await Promise.resolve();
+  // force the map color accessors to resolve LIGHT for the duration of the
+  // snapshot so the exported file stays self-contained and authored-light even
+  // when the on-screen theme is dark. Reset in the finally below so the live map
+  // returns to its current theme afterward.
+  set_exporting_light(true);
 
-  // deep-clone the live SVG; this snapshot is what we mutate and export
-  const clone = svg.cloneNode(true) as SVGSVGElement;
+  // clone inside a try so the force-light flag is always released, even if the
+  // clone or any DOM read throws
+  let clone: SVGSVGElement;
+  try {
+    // let Solid reactivity flush both the hover clear and the force-light flag
+    // into the live DOM before we snapshot it
+    await Promise.resolve();
+
+    // deep-clone the live SVG; this snapshot is what we mutate and export. The
+    // live DOM now carries light inline colors because the flush above repainted
+    // the reactive color accessors under exporting_light = true.
+    clone = svg.cloneNode(true) as SVGSVGElement;
+  } finally {
+    // release the override so the on-screen map repaints back to its theme
+    set_exporting_light(false);
+  }
 
   // find the single <g data-viewport> in the clone and strip its transform
   // so the exported SVG uses untransformed (map-space) coordinates

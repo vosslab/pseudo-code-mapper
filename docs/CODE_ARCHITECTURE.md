@@ -14,15 +14,15 @@ and autosaves to localStorage. There is no backend; the production build is a st
 
 - [src/main.tsx](../src/main.tsx) - entry point; mounts the app into `#app`.
 - [src/app.tsx](../src/app.tsx) - top-level layout: toolbar, editor pane, map pane,
-  rubric panel; captures the live SVG element ref for exports. Includes the
+  rubric panel; captures the live SVG element ref for exports. Owns the
   `<div class="pane-resizer">` divider: pointer-capture drag updates `--editor-ratio`
   on `.main-area` (clamped 25%-65%); double-click resets to 40%; ArrowLeft/ArrowRight
   nudge by 2%; ratio persists to `localStorage["concept-map-maker:editor-ratio"]`. Also
-  owns the corner-style preset: loads `localStorage["concept-map-maker:corner-style"]`
-  on mount, applies `data-corners` attribute to `<html>`, and handles preset changes
-  via a dropdown in the Layout toolbar group (four presets: Capsule, Oval, Rounded rect, Corner rect).
-- [src/toolbar.tsx](../src/toolbar.tsx) - ribbon toolbar with four labeled groups (File,
-  CSV, Image & Print, Layout). Each button carries a Font Awesome solid glyph
+  calls `setup_map_theme()` on mount to wire the MutationObserver that keeps the map
+  light/dark signal in sync with the `data-ui-theme` attribute.
+- [src/toolbar.tsx](../src/toolbar.tsx) - ribbon toolbar with three labeled groups (File,
+  CSV, Image & Print) plus a standalone appearance toggle (sun/moon icon with "Light"/"Dark"
+  text label). Each button carries a Font Awesome solid glyph
   (`aria-hidden="true"`) plus a text label. Icons are served from the vendored
   `vendor/fontawesome/` assets (fa-solid.min.css + fa-solid-900.woff2); no CDN
   dependency. `build_github_pages.sh` copies `vendor/fontawesome/` into `dist/` and
@@ -35,8 +35,28 @@ and autosaves to localStorage. There is no backend; the production build is a st
 - [src/concept_autocomplete.tsx](../src/concept_autocomplete.tsx) - concept-label
   autocomplete for from/to inputs.
 - [src/theme_picker.tsx](../src/theme_picker.tsx) - bubble shape and palette selector.
+- [src/ui_theme_toggle.tsx](../src/ui_theme_toggle.tsx) - toolbar button that cycles the
+  UI appearance between Light and Dark; persists the choice to localStorage.
+
+### UI theme
+
+- [src/ui_theme.ts](../src/ui_theme.ts) - two-state (light / dark) appearance model.
+  Exports the `UiTheme` type, load/save/apply/next helpers, and the `map_is_dark()`
+  resolved accessor (a `createMemo`). On first-ever load the initial theme is read
+  once from the OS dark-mode preference and stored as a concrete `"light"` or `"dark"`;
+  OS preference is not tracked live afterward. The `set_exporting_light()` flag is
+  honored by `map_is_dark()` so SVG/PNG export always snapshots light colors regardless
+  of the on-screen theme. `setup_map_theme()` registers a MutationObserver on the
+  `<html>` `data-ui-theme` attribute (cleaned up via `onCleanup`).
+- [src/index.html](../src/index.html) - contains an inline `<script>` that reads
+  `localStorage["concept-map-maker:ui-theme"]` and sets `data-ui-theme` on `<html>`
+  before any CSS or JS loads, preventing a flash of the wrong theme.
 
 ### Map rendering (SVG)
+
+All map rendering uses inline SVG attributes (never CSS classes) so the export DOM
+is self-contained. `map_is_dark()` is called at render time to resolve light/dark
+color values for edges, arrowheads, and node borders/labels.
 
 - [src/map_canvas.tsx](../src/map_canvas.tsx) - SVG root with pan/zoom viewport; renders
   edges and nodes.
@@ -55,7 +75,8 @@ and autosaves to localStorage. There is no backend; the production build is a st
   (one `Map<ConceptKey, CellRole>` per active-concept change), `set_cell_focus` /
   `set_cell_hover`, `focused_concept`, and the `CellRole` type ("same" / "from" / "to").
 - [src/types.ts](../src/types.ts) - shared type contracts (`Triple`, `CmapDocument`,
-  `ConceptKey` normalizer, `ValidationItem`, themes).
+  `ConceptKey` normalizer, `ValidationItem`, themes). Zero imports; the frozen contract
+  for the whole codebase.
 
 ### Pure derivation modules (no Solid imports, node-testable)
 
@@ -69,7 +90,11 @@ and autosaves to localStorage. There is no backend; the production build is a st
   triples, isolated concepts, typo hints).
 - [src/edge_geometry.ts](../src/edge_geometry.ts) - curved edge paths and arrowhead geometry.
 - [src/map_bounds.ts](../src/map_bounds.ts) - bounding box for viewBox and export sizing.
-- [src/themes.ts](../src/themes.ts) - theme color palettes and shapes.
+- [src/themes.ts](../src/themes.ts) - shape registry (`SHAPE_REGISTRY`, `ShapeSpec`,
+  `ORIGIN_EMPHASIS`); re-exports `PALETTES` and `depth_fill` from `palettes.ts` so
+  existing importers continue to work unchanged.
+- [src/palettes.ts](../src/palettes.ts) - bubble color palette data (`PALETTES` registry,
+  `depth_fill` helper). Pure data module; no Solid or DOM imports.
 - [src/measure_text.ts](../src/measure_text.ts) - pixel-accurate text width measurement
   via a shared offscreen canvas context. Used by the triples table to autosize each column
   to the widest committed value at commit time (not per keystroke).
@@ -81,7 +106,21 @@ and autosaves to localStorage. There is no backend; the production build is a st
 - [src/csv_codec.ts](../src/csv_codec.ts) - RFC 4180 CSV/TSV parse and serialize for
   triples (Excel paste, CSV import/export).
 - [src/export_svg.ts](../src/export_svg.ts) - SVG text export and SVG/PNG download from
-  the live SVG element.
+  the live SVG element. Sets `set_exporting_light(true)` before the microtask flush so
+  both download paths snapshot authored-light colors regardless of on-screen theme.
+
+### Styles
+
+- [src/style.css](../src/style.css) - barrel file of `@import` statements; Vite bundles
+  all seven CSS modules in cascade order.
+- [src/css/tokens.css](../src/css/tokens.css) - `:root` design tokens plus the
+  `[data-ui-theme="dark"]` override block (UI light/dark theming via CSS custom properties).
+- [src/css/base.css](../src/css/base.css) - global resets and body layout.
+- [src/css/toolbar.css](../src/css/toolbar.css) - ribbon toolbar styles.
+- [src/css/editor.css](../src/css/editor.css) - triples table and editor pane styles.
+- [src/css/map.css](../src/css/map.css) - SVG map pane styles.
+- [src/css/rubric.css](../src/css/rubric.css) - rubric panel styles.
+- [src/css/print.css](../src/css/print.css) - print media query overrides.
 
 ## Data flow
 
@@ -91,12 +130,15 @@ and autosaves to localStorage. There is no backend; the production build is a st
    read only `triples`, never drag overrides or hover state, so dragging never re-runs
    layout.
 3. [src/map_canvas.tsx](../src/map_canvas.tsx) renders each concept at
-   `override ?? layout` position and each triple as a curved edge.
+   `override ?? layout` position and each triple as a curved edge. Light/dark colors are
+   resolved inline from `map_is_dark()` at render time.
 4. Hover (table row, bubble, or edge) sets the ephemeral hover signal, which drives
    cross-highlight memos in both directions.
 5. A debounced effect serializes the document via
    [src/document_codec.ts](../src/document_codec.ts) into
    `localStorage["concept-map-maker:document"]`; boot reads the same slot.
+6. SVG/PNG export calls `set_exporting_light(true)`, clones the DOM, then resets the
+   flag so the exported file always uses light-mode colors.
 
 ## Build pipeline
 
@@ -130,7 +172,12 @@ and autosaves to localStorage. There is no backend; the production build is a st
   test.
 - New export format: follow the pattern in [src/export_svg.ts](../src/export_svg.ts) and
   wire a button in [src/toolbar.tsx](../src/toolbar.tsx).
-- New theme: add to [src/themes.ts](../src/themes.ts).
+- New bubble palette: add to [src/palettes.ts](../src/palettes.ts) and extend the
+  `ThemePalette` union in [src/types.ts](../src/types.ts).
+- New bubble shape: add to [src/themes.ts](../src/themes.ts) (`SHAPE_REGISTRY`) and extend
+  the `ThemeShape` union in [src/types.ts](../src/types.ts).
+- New CSS section: add a file under `src/css/` and add its `@import` to
+  [src/style.css](../src/style.css).
 
 ## Known gaps
 

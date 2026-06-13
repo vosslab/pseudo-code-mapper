@@ -4,6 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Concept Map Maker</title>
+    <script>
+      // Storage key MUST match UI_THEME_STORAGE_KEY in src/ui_theme.ts
+      try {
+        let t = localStorage.getItem("concept-map-maker:ui-theme");
+        if (t !== "light" && t !== "dark") {
+          t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
+            ? "dark" : "light";
+          localStorage.setItem("concept-map-maker:ui-theme", t);
+        }
+        document.documentElement.setAttribute("data-ui-theme", t);
+      } catch (e) {
+        document.documentElement.setAttribute("data-ui-theme", "light");
+      }
+    </script>
     <link rel="stylesheet" href="vendor/fontawesome/fa-solid.min.css" />
     <link rel="stylesheet" href="style.css" />
   </head>

@@ -29,7 +29,6 @@ const ICON_CLASSES = [
   "fa-vector-square",
   "fa-image",
   "fa-print",
-  "fa-diagram-project",
 ];
 
 test("FA icons render with nonzero width", async ({ page }) => {

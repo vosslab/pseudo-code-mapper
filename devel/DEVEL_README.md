@@ -1,7 +1,7 @@
 # devel scripts
 
-Developer-facing maintenance scripts for this repo: version bumping,
-changelog management, and build cleanup. These are run by maintainers,
+Developer-facing maintenance scripts for this repo: version bumping, PyPI
+release, changelog management, and build cleanup. These are run by maintainers,
 not shipped to consumers and not part of the fast pytest lane.
 
 | Script | Purpose |

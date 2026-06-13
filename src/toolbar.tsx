@@ -1,6 +1,6 @@
 // toolbar.tsx - document toolbar: editable title, Save/Open/Clear JSON buttons,
 // autosave status indicator, CSV import/export, SVG/PNG/print export,
-// and re-layout button.
+// and UI theme toggle.
 
 import { createSignal, Show } from "solid-js";
 import type { Accessor, JSX } from "solid-js";
@@ -9,6 +9,7 @@ import type { AppState } from "./app_state";
 import { serialize_document, parse_document, empty_document } from "./document_codec";
 import { serialize_triples_csv, parse_triples_csv } from "./csv_codec";
 import { download_svg, download_png } from "./export_svg";
+import { UiThemeToggle } from "./ui_theme_toggle";
 
 //============================================
 // Toolbar
@@ -187,20 +188,6 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
     window.print();
   }
 
-  //--------------------------------------------
-  // --- LAYOUT GROUP: Re-layout ---
-  //--------------------------------------------
-
-  // Re-layout: confirm, then clear all overrides so bubbles return to auto-layout.
-  function handle_relayout(): void {
-    const confirmed = window.confirm(
-      "Reset all bubble positions to auto-layout? Dragged positions will be lost.",
-    );
-    if (confirmed) {
-      state.clear_overrides();
-    }
-  }
-
   // Disable export buttons until the canvas SVG element is available.
   const svg_ready = (): boolean => props.svg() !== null;
 
@@ -319,22 +306,8 @@ export function Toolbar(props: ToolbarProps): JSX.Element {
         </span>
       </span>
 
-      {/* --- LAYOUT GROUP --- */}
-      <span class="toolbar-group" role="group" aria-labelledby="tg-caption-layout">
-        <span class="toolbar-group-caption" id="tg-caption-layout">
-          Layout
-        </span>
-        <span class="toolbar-group-buttons">
-          <button
-            class="toolbar-btn"
-            aria-label="Reset bubble positions to auto-layout"
-            onClick={handle_relayout}
-          >
-            <i class="fa-solid fa-diagram-project" aria-hidden="true" />
-            Re-layout
-          </button>
-        </span>
-      </span>
+      {/* UI theme toggle - last interactive control before the autosave status */}
+      <UiThemeToggle />
 
       {/* Autosave status indicator */}
       <span class="toolbar-autosave-status" aria-live="polite">

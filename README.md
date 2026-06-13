@@ -9,23 +9,34 @@ and directed arrows carry verb phrases ("concept maps --organize--> ideas"). Thi
 in the browser with no install, no account, and no backend. Students enter rows in a
 spreadsheet-like triples table (This concept | verb phrase | points to this concept); the app
 auto-generates an SVG map using dagre auto-layout, colors bubbles by graph distance from origin
-bubbles, validates the assignment rubric live (30+ unique concepts, a verb phrase on every arrow), and
-saves work automatically in localStorage. Exports include PNG, SVG, JSON, CSV, and print. The app
-is in active development.
+bubbles, validates the assignment rubric live (30+ unique concepts, a verb phrase on every arrow),
+and saves work automatically in localStorage. Exports include PNG, SVG, JSON, CSV, and print.
+
+The UI includes a two-state light/dark theme toggle; the on-screen concept map adapts to the
+selected theme while SVG/PNG exports remain light. The app is deployed on GitHub Pages and runs
+with no server.
 
 ## Documentation
 
+Getting started:
+
 - [docs/INSTALL.md](docs/INSTALL.md) - setup steps, dependencies, and install verification
 - [docs/USAGE.md](docs/USAGE.md) - how to run the app, build maps, save work, and run dev checks
+
+Reference:
+
 - [docs/CODE_ARCHITECTURE.md](docs/CODE_ARCHITECTURE.md) - components, data flow, and build pipeline
 - [docs/FILE_STRUCTURE.md](docs/FILE_STRUCTURE.md) - directory map and where new work goes
 - [docs/FILE_FORMATS.md](docs/FILE_FORMATS.md) - project JSON, triples CSV, paste, and export formats
 - [docs/CHANGELOG.md](docs/CHANGELOG.md) - chronological record of changes grouped by date
+
+Style and testing:
+
 - [docs/REPO_STYLE.md](docs/REPO_STYLE.md) - repo-wide conventions and core principles
-- [docs/PYTHON_STYLE.md](docs/PYTHON_STYLE.md) - Python formatting, linting, and conventions
+- [docs/TYPESCRIPT_STYLE.md](docs/TYPESCRIPT_STYLE.md) - TypeScript formatting and conventions
+- [docs/PLAYWRIGHT_USAGE.md](docs/PLAYWRIGHT_USAGE.md) - browser-driven Playwright test guide
 - [docs/PYTEST_STYLE.md](docs/PYTEST_STYLE.md) - pytest test-writing rules and failure triage
 - [docs/MARKDOWN_STYLE.md](docs/MARKDOWN_STYLE.md) - Markdown writing rules for this repo
-- [docs/E2E_TESTS.md](docs/E2E_TESTS.md) - end-to-end testing conventions
 
 ## Quick start
 
@@ -43,7 +54,13 @@ Run the full codebase check (TypeScript, ESLint, node unit tests):
 bash check_codebase.sh
 ```
 
-Run the Python hygiene tests (linting, link checks, shebang checks):
+Run browser-driven Playwright tests:
+
+```bash
+bash run_playwright_tests.sh
+```
+
+Run Python hygiene tests (linting, link checks, shebang checks):
 
 ```bash
 pytest tests/

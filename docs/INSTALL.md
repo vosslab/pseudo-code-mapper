@@ -22,11 +22,34 @@ bash devel/setup_typescript.sh
 This runs `npm install` against [../package.json](../package.json) (TypeScript, esbuild,
 SolidJS, ESLint, Prettier, tsx, Playwright).
 
+For a clean reproducible install (CI / GitHub Pages uses this form):
+
+```bash
+npm ci
+```
+
 Optional, only for browser tests:
 
 ```bash
 bash devel/setup_playwright.sh
 ```
+
+## Build
+
+```bash
+bash build_github_pages.sh
+```
+
+Produces the production bundle in `dist/`. Run once after install before serving.
+
+## Serve locally
+
+```bash
+bash run_web_server.sh
+```
+
+Serves `dist/` via Python's `http.server`. Open the URL printed in the terminal
+(usually `http://localhost:8080`).
 
 ## Verify install
 
@@ -35,6 +58,12 @@ bash check_codebase.sh
 ```
 
 Exits 0 with a PASS summary (typecheck, lint, format check, node unit tests).
+
+Browser tests (requires Playwright install step above):
+
+```bash
+bash run_playwright_tests.sh
+```
 
 ## Known gaps
 

@@ -9,12 +9,13 @@ concept-map-maker/
 +- tests/                  # node unit tests, Playwright specs, Python hygiene tests
 +- tools/                  # standalone helper scripts (html_to_pdf.mjs)
 +- devel/                  # developer maintenance scripts (changelog, setup, version)
++- vendor/                 # vendored third-party assets (Font Awesome)
 +- docs/                   # project documentation
 +- build_github_pages.sh   # canonical production build into dist/
 +- run_web_server.sh       # build then serve dist/ locally
 +- run_playwright_tests.sh # build (if needed) and run Playwright suite
 +- check_codebase.sh       # typecheck + lint + format + node test gate
-+- run_walkthrough_demo.sh # build then play a scripted walkthrough demo (captures screenshots/video)
++- run_walkthrough_demo.sh # build then play a scripted walkthrough demo
 +- source_me.sh            # Python environment bootstrap
 +- package.json            # npm scripts and dependencies
 +- playwright.config.ts    # Playwright configuration
@@ -30,23 +31,55 @@ concept-map-maker/
 
 ### src/
 
-- Components: [src/app.tsx](../src/app.tsx), [src/toolbar.tsx](../src/toolbar.tsx),
-  [src/map_canvas.tsx](../src/map_canvas.tsx), [src/concept_node.tsx](../src/concept_node.tsx),
-  [src/concept_edge.tsx](../src/concept_edge.tsx), [src/triples_table.tsx](../src/triples_table.tsx),
-  [src/triple_row.tsx](../src/triple_row.tsx),
-  [src/rubric_panel.tsx](../src/rubric_panel.tsx), [src/theme_picker.tsx](../src/theme_picker.tsx),
+SolidJS + TypeScript application source. Vite (via esbuild) bundles `src/main.tsx` as the
+entry point. All CSS is imported from `src/style.css` (a barrel of `@import` lines).
+
+Components (`.tsx`):
+- [src/app.tsx](../src/app.tsx), [src/toolbar.tsx](../src/toolbar.tsx)
+- [src/map_canvas.tsx](../src/map_canvas.tsx), [src/concept_node.tsx](../src/concept_node.tsx),
+  [src/concept_edge.tsx](../src/concept_edge.tsx)
+- [src/triples_table.tsx](../src/triples_table.tsx), [src/triple_row.tsx](../src/triple_row.tsx)
+- [src/rubric_panel.tsx](../src/rubric_panel.tsx), [src/theme_picker.tsx](../src/theme_picker.tsx),
   [src/concept_autocomplete.tsx](../src/concept_autocomplete.tsx)
-- State and types: [src/app_state.ts](../src/app_state.ts), [src/types.ts](../src/types.ts)
-- Pure modules: [src/derive_concepts.ts](../src/derive_concepts.ts),
-  [src/layout_graph.ts](../src/layout_graph.ts), [src/graph_depth.ts](../src/graph_depth.ts),
+- [src/ui_theme_toggle.tsx](../src/ui_theme_toggle.tsx) - toolbar light/dark switch
+
+State and types:
+- [src/app_state.ts](../src/app_state.ts), [src/types.ts](../src/types.ts)
+
+UI theme:
+- [src/ui_theme.ts](../src/ui_theme.ts) - two-state light/dark model, `map_is_dark()` accessor,
+  `set_exporting_light()` flag, `setup_map_theme()` observer wiring
+
+Pure modules (no Solid imports, node-testable):
+- [src/derive_concepts.ts](../src/derive_concepts.ts),
+  [src/layout_graph.ts](../src/layout_graph.ts),
+  [src/graph_depth.ts](../src/graph_depth.ts),
   [src/validate_document.ts](../src/validate_document.ts),
-  [src/edge_geometry.ts](../src/edge_geometry.ts), [src/map_bounds.ts](../src/map_bounds.ts),
-  [src/themes.ts](../src/themes.ts),
+  [src/edge_geometry.ts](../src/edge_geometry.ts),
+  [src/map_bounds.ts](../src/map_bounds.ts),
   [src/measure_text.ts](../src/measure_text.ts)
-- Codecs and export: [src/document_codec.ts](../src/document_codec.ts),
-  [src/csv_codec.ts](../src/csv_codec.ts), [src/export_svg.ts](../src/export_svg.ts)
-- Static assets: [src/index.html](../src/index.html), [src/style.css](../src/style.css)
-  (copied verbatim into `dist/` by the build)
+- [src/themes.ts](../src/themes.ts) - shape registry; re-exports palettes from `palettes.ts`
+- [src/palettes.ts](../src/palettes.ts) - bubble color `PALETTES` registry and `depth_fill` helper
+
+Codecs and export:
+- [src/document_codec.ts](../src/document_codec.ts),
+  [src/csv_codec.ts](../src/csv_codec.ts),
+  [src/export_svg.ts](../src/export_svg.ts)
+
+Static assets:
+- [src/index.html](../src/index.html) - HTML shell; includes an inline script that sets
+  `data-ui-theme` on `<html>` before paint to prevent theme flash
+- [src/style.css](../src/style.css) - barrel of `@import` statements (not processed by Vite
+  directly; copied verbatim into `dist/` by the build script)
+
+CSS modules under [src/css/](../src/css/):
+- `tokens.css` - `:root` design tokens + `[data-ui-theme="dark"]` override block
+- `base.css` - global resets and body layout
+- `toolbar.css` - ribbon toolbar styles
+- `editor.css` - triples table and editor pane styles
+- `map.css` - SVG map pane styles
+- `rubric.css` - rubric panel styles
+- `print.css` - print media query overrides
 
 See [CODE_ARCHITECTURE.md](CODE_ARCHITECTURE.md) for how these fit together.
 
@@ -57,9 +90,8 @@ See [CODE_ARCHITECTURE.md](CODE_ARCHITECTURE.md) for how these fit together.
 - `tests/playwright/*.spec.ts` - browser E2E specs plus
   [tests/playwright/helpers.ts](../tests/playwright/helpers.ts); run via
   [run_playwright_tests.sh](../run_playwright_tests.sh).
-- `tests/playwright/walkthrough_demo.mts` - standalone
-  scripted walkthrough demo (not a Playwright spec); invoked via
-  `run_walkthrough_demo.sh`.
+- `tests/playwright/walkthrough_demo.mts` - standalone scripted walkthrough demo
+  (not a Playwright spec); invoked via `run_walkthrough_demo.sh`.
 - `tests/playwright/walkthrough_data/` - data fixtures for the walkthrough demo
   (for example `honeybees_triples.json`, the default dataset).
 - `tests/test_*.py` - Python hygiene pytest suite (whitespace, indentation, ASCII,
@@ -98,9 +130,9 @@ All `vendor/` paths are excluded from pytest hygiene scans via `tests/conftest.p
 ## Generated artifacts (gitignored)
 
 - `dist/` - production build output (`main.js`, `main.js.map`, `index.html`,
-  `style.css`, `.nojekyll`)
-- `output_smoke/` - smoke-test screenshots and video artifacts captured by the walkthrough
-  demo and other one-off visual checks (gitignored; stable folder name reused across runs)
+  `style.css`, `.nojekyll`, `vendor/fontawesome/`)
+- `output_smoke/` - smoke-test screenshots and video artifacts (stable folder name
+  reused across runs)
 - `node_modules/`, `package-lock.json` - npm dependencies
 - `test-results/`, `playwright-report/`, `blob-report/`, `coverage/` - test outputs
 - `*.tsbuildinfo`, `.eslintcache`, `.prettiercache` - tool caches
@@ -122,6 +154,7 @@ All `vendor/` paths are excluded from pytest hygiene scans via `tests/conftest.p
 ## Where to add new work
 
 - App code: `src/` (pure logic in a Solid-free `.ts` module when possible)
+- CSS: add a file under `src/css/` and add its `@import` to `src/style.css`
 - Unit tests: `tests/test_<module>.mjs` mirroring the src module name
 - Browser tests: `tests/playwright/<feature>.spec.ts`
 - Docs: `docs/` with SCREAMING_SNAKE_CASE filenames

@@ -135,7 +135,6 @@ export interface AppState {
   set_title: (title: string) => void;
   set_theme: (patch: Partial<Theme>) => void;
   set_override: (key: ConceptKey, position: Position) => void;
-  clear_overrides: () => void;
   replace_document: (next: CmapDocument) => void;
   bulk_insert_triples: (rows: Array<Partial<Triple>>) => string[];
   insert_triple_after: (after_index: number, triple?: Partial<Triple>) => string;
@@ -602,13 +601,6 @@ function build_state(
     set_doc("overrides", key, { x: position.x, y: position.y });
   };
 
-  // clear_overrides: drop every drag adjustment so bubbles return to auto-layout
-  // (the re-layout button). Replaces the overrides object wholesale.
-  const clear_overrides = (): void => {
-    const empty_overrides: Record<ConceptKey, Position> = {};
-    set_doc("overrides", empty_overrides);
-  };
-
   // replace_document: swap the entire working document (open-file / new-doc).
   // reconcile keeps fine-grained reactivity stable across the swap.
   const replace_document = (next: CmapDocument): void => {
@@ -714,7 +706,6 @@ function build_state(
     set_title,
     set_theme,
     set_override,
-    clear_overrides,
     replace_document,
     bulk_insert_triples,
     insert_triple_after,

@@ -52,18 +52,21 @@ Items are marked OK, WARN, FAIL, or HINT.
 
 - **Auto layout** - dagre places bubbles automatically when you add or edit triples.
 - **Drag bubbles** - drag a bubble to reposition it. Dragged positions persist until
-  you use Re-layout.
-- **Re-layout button** - resets all bubbles to auto-layout positions (confirms before
-  clearing dragged positions).
+  you rename the concept or reload a saved project file.
 - **Renaming a concept** - editing a concept name in the Triples table resets that
   bubble's dragged position back to auto-layout.
 - **Pane resizer** - drag the divider between the triples table and the map to widen
   either pane. Double-click the divider to reset to the default 40/60 split.
   ArrowLeft and ArrowRight (when the divider is focused) nudge the split by 2%. The
   ratio persists across page reloads via localStorage.
-- **Corner style** - the "Corners" dropdown in the Layout toolbar group selects from
-  four presets: Capsule (pill-shaped), Oval (elliptical), Rounded rect (classic 5px),
-  Corner rect (sharp 0px). The choice persists across page reloads via localStorage.
+- **Appearance** - a sun/moon icon plus a "Light"/"Dark" text label at the far right
+  of the toolbar toggles between light and dark UI chrome. One click flips the theme;
+  the choice persists across page reloads via localStorage. On first load the OS
+  preference sets the initial state. Map chrome (edges, verb labels, arrowhead
+  markers, node borders, and label text) adapts to the active theme. Authored bubble
+  fill colors are the same in both themes.
+  SVG, PNG export, and Print always render light/authored colors regardless of
+  the current screen theme.
 - **Pan and zoom** - scroll or pinch to zoom, drag the background to pan. Double-click
   the background to reset the view.
 - **Themes** - the theme picker in the map pane header changes bubble shape and color
@@ -108,7 +111,7 @@ Live URL: `https://vosslab.github.io/concept-map-maker/`
 ### How it works
 
 - Triggers: push to `main` and `workflow_dispatch` (manual run from the Actions tab).
-- CI runs `npm ci` then `npm run build` (Node 20 LTS) -- the same build command used locally.
+- CI runs `npm ci` then `npm run build` (Node 24) -- the same build command used locally.
 - Two jobs: `build` uploads `dist/` as a Pages artifact; `deploy` publishes it via
   `actions/deploy-pages`.
 - Assets stay relative (no absolute `/` paths, no `<base href>`), so the app serves

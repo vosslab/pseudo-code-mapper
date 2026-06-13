@@ -1,0 +1,179 @@
+/* toolbar.css - toolbar strip, ribbon groups, title input, autosave/error bits */
+
+/* ============================================================
+   Toolbar strip
+   ============================================================ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  /* vertical padding gives the ribbon panels room to breathe above/below */
+  padding: 6px var(--pad);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--gap);
+}
+
+/* Deliberate row arrangement: title input at the far left, the four ribbon
+   groups as a left-aligned cluster, autosave pushed to the far right. All
+   items align to a common bottom edge so captions sit above one baseline. */
+.toolbar-content {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--ribbon-group-gap);
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.toolbar-title-input {
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  /* border-radius uses --control-radius (classic Mac rounded rect, 5px) */
+  border-radius: var(--control-radius);
+  padding: 4px var(--control-pad-x);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-width: 160px;
+  max-width: 280px;
+  /* sits level with the ribbon button row, not the taller group panels */
+  margin-bottom: 2px;
+}
+
+.toolbar-title-input:focus {
+  outline: 2px solid var(--from-accent);
+  outline-offset: 1px;
+}
+
+.toolbar-btn {
+  font-size: 13px;
+  padding: 4px var(--control-pad-x);
+  border: 1px solid var(--color-border);
+  /* border-radius uses --control-radius (classic Mac rounded rect, 5px) */
+  border-radius: var(--control-radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  /* allow text to wrap so buttons stay narrow; nowrap overridden in ribbon context below */
+  white-space: normal;
+}
+
+.toolbar-btn:hover {
+  background: var(--color-border);
+}
+
+.toolbar-btn:focus-visible {
+  outline: 2px solid var(--from-accent);
+  outline-offset: 1px;
+}
+
+.toolbar-btn-danger {
+  color: var(--color-danger);
+}
+
+/* Icon-only variant: square pad so a single icon does not look cramped. */
+.toolbar-btn-icon {
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.toolbar-autosave-status {
+  font-size: 11px;
+  color: var(--color-muted);
+  white-space: nowrap;
+  /* pushed to the far right of the bar, level with the button row */
+  margin-left: auto;
+  margin-bottom: 4px;
+}
+
+.toolbar-open-error {
+  font-size: 12px;
+  color: var(--color-danger);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.toolbar-btn-dismiss {
+  font-size: 11px;
+  padding: 1px 5px;
+  border: 1px solid var(--color-danger);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--color-danger);
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+/* ribbon toolbar ============================================== */
+
+/* Each semantic group in the ribbon toolbar: a raised panel holding a caption
+   on top and a single horizontal row of buttons below. All four panels share
+   identical padding so they read as one family; the panel border is the only
+   separator between groups (no ad-hoc dividers), and --ribbon-group-gap on the
+   toolbar-content flex sets the uniform space between panels.
+   Uses --ribbon-btn-radius (always modest) so panel frames stay understated. */
+.toolbar-group {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  border: 1px solid var(--color-border);
+  border-radius: var(--ribbon-btn-radius);
+  padding: 3px 6px 5px 6px;
+  background: var(--color-surface);
+  gap: 3px;
+  position: relative;
+}
+
+/* Caption label centered above each group's button row. Uniform typography and
+   spacing across all four groups so the captions sit on one line. */
+.toolbar-group-caption {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.2;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 1px;
+}
+
+/* The horizontal button row inside a group. --ribbon-btn-gap keeps a single,
+   consistent space between sibling buttons (one family). */
+.toolbar-group-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: var(--ribbon-btn-gap);
+}
+
+/* Buttons inside a ribbon group: icon + label, equal height, consistent
+   padding and icon-to-label gap so every button feels uniform.
+   max-width caps button width so multi-word labels wrap to two lines,
+   keeping the ribbon compact. min-height keeps one-word buttons (Clear,
+   Print) the same height as two-line siblings. text-align center aligns
+   the wrapped label under the icon. Horizontal padding follows --control-pad-x. */
+.toolbar-group .toolbar-btn {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 4px var(--control-pad-x);
+  max-width: 90px;
+  min-height: 40px;
+  white-space: normal;
+  text-align: left;
+  word-break: break-word;
+}
+
+/* Ribbon icon sizing: constrained so icons sit beside text cleanly. */
+.toolbar-group .toolbar-btn .fa-solid {
+  font-size: 13px;
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}

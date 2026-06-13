@@ -21,11 +21,40 @@ const ROOT = path.resolve(__dirname, "..");
 
 const watch = process.argv.includes("--watch");
 
+// Recursively copy a source directory into a destination directory.
+function copy_dir(src_dir, dest_dir) {
+  fs.mkdirSync(dest_dir, { recursive: true });
+  for (const entry of fs.readdirSync(src_dir, { withFileTypes: true })) {
+    const src_path = path.join(src_dir, entry.name);
+    const dest_path = path.join(dest_dir, entry.name);
+    if (entry.isDirectory()) {
+      copy_dir(src_path, dest_path);
+    } else {
+      fs.copyFileSync(src_path, dest_path);
+    }
+  }
+}
+
 // Copy static assets into dist/ and write .nojekyll.
 function copy_assets() {
   fs.mkdirSync(path.join(ROOT, "dist"), { recursive: true });
   fs.copyFileSync(path.join(ROOT, "src", "index.html"), path.join(ROOT, "dist", "index.html"));
   fs.copyFileSync(path.join(ROOT, "src", "style.css"), path.join(ROOT, "dist", "style.css"));
+  // Copy the CSS submodule directory so @import refs in style.css resolve.
+  // src/css/ is a required input; if it is missing the build fails loudly.
+  const css_src = path.join(ROOT, "src", "css");
+  if (!fs.existsSync(css_src)) {
+    throw new Error(`Required directory missing: ${css_src}. Add src/css/ before building.`);
+  }
+  copy_dir(css_src, path.join(ROOT, "dist", "css"));
+  // Copy vendored Font Awesome so toolbar icons resolve on every build path.
+  // vendor/fontawesome/ is the source of truth (repo root); if missing the
+  // build fails loudly rather than producing a dist/ with broken icons.
+  const vendor_src = path.join(ROOT, "vendor", "fontawesome");
+  if (!fs.existsSync(vendor_src)) {
+    throw new Error(`Required directory missing: ${vendor_src}. Add vendor/fontawesome/ before building.`);
+  }
+  copy_dir(vendor_src, path.join(ROOT, "dist", "vendor", "fontawesome"));
   // .nojekyll ensures GitHub Pages serves files whose names start with _.
   fs.writeFileSync(path.join(ROOT, "dist", ".nojekyll"), "");
 }

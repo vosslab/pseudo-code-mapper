@@ -67,12 +67,7 @@ node pipeline/build.mjs
 test -f dist/index.html
 test -f dist/main.js
 
-# Copy vendored Font Awesome assets so the ribbon toolbar icons load offline.
-mkdir -p dist/vendor/fontawesome
-cp vendor/fontawesome/fa-solid.min.css dist/vendor/fontawesome/
-cp vendor/fontawesome/fa-solid-900.woff2 dist/vendor/fontawesome/
-cp vendor/fontawesome/LICENSE.txt dist/vendor/fontawesome/
-
+# vendor/fontawesome/ is now copied by pipeline/build.mjs (copy_assets).
 # Hard assertion: build fails if the font file is missing from dist/.
 test -f dist/vendor/fontawesome/fa-solid-900.woff2 || {
   echo "ERROR: dist/vendor/fontawesome/fa-solid-900.woff2 missing after copy." >&2

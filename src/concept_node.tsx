@@ -24,10 +24,12 @@
 import { createMemo } from "solid-js";
 import type { JSX } from "solid-js";
 
-import { SHAPE_REGISTRY, depth_fill, ORIGIN_EMPHASIS } from "./themes";
+import { SHAPE_REGISTRY, ORIGIN_EMPHASIS } from "./themes";
+import { depth_fill } from "./palettes";
 import type { AppState } from "./app_state";
 import type { ConceptKey } from "./types";
 import type { NodeBox } from "./edge_geometry";
+import { map_is_dark } from "./ui_theme";
 
 //============================================
 // Highlight ring colors
@@ -50,6 +52,59 @@ const LABEL_FONT_SIZE = "14";
 // Base (non-origin) border color and width.
 const BASE_STROKE = "#555555";
 const BASE_STROKE_WIDTH = 1;
+
+// Dark-mode screen variants. The bubble FILL palette (earth/fire from the doc
+// theme) stays authored/unchanged; only the border color shifts for contrast
+// against the depth fills on a dark pane. Export forces light, so the
+// exported SVG/PNG uses the light values above (map_is_dark() returns false).
+const BASE_STROKE_DARK = "#9a9a9a";
+
+//============================================
+// label_color_for_fill
+//============================================
+// Choose a near-black or near-white label that maximises contrast against the
+// given hex fill, using the WCAG relative-luminance formula (IEC 61966-2-1).
+// Picks whichever of the two candidates yields the higher ratio; when both are
+// equal (near-neutral fill) black wins as the default. The selected color is
+// inline-safe: it works in live SVG and in static exports where no CSS is
+// loaded. Note: fills near mid-gray (luminance ~0.18) may not reach the 5.5:1
+// repo target with either pure black or white; this is an inherent property of
+// those fill hues and is flagged in the palette audit, not patched here.
+function srgb_linearize(channel_255: number): number {
+  // Convert an 8-bit sRGB channel value [0-255] to linear light [0-1].
+  const c = channel_255 / 255;
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+function relative_luminance(hex: string): number {
+  // WCAG 2.x relative luminance: L = 0.2126R + 0.7152G + 0.0722B (linear).
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return 0.2126 * srgb_linearize(r) + 0.7152 * srgb_linearize(g) + 0.0722 * srgb_linearize(b);
+}
+
+function contrast_ratio(L1: number, L2: number): number {
+  // WCAG contrast ratio given two relative luminances.
+  const lighter = Math.max(L1, L2);
+  const darker = Math.min(L1, L2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+// Black and white label luminances (pre-computed constants).
+const BLACK_LABEL = "#000000";
+const WHITE_LABEL = "#ffffff";
+const L_BLACK = 0; // relative luminance of #000000
+const L_WHITE = 1; // relative luminance of #ffffff
+
+function label_color_for_fill(fill_hex: string): string {
+  // Return the label color (black or white) that maximises contrast against
+  // the given fill. White wins only when it yields strictly higher contrast.
+  const L_fill = relative_luminance(fill_hex);
+  const ratio_black = contrast_ratio(L_fill, L_BLACK);
+  const ratio_white = contrast_ratio(L_fill, L_WHITE);
+  return ratio_white > ratio_black ? WHITE_LABEL : BLACK_LABEL;
+}
 
 // Outer halo padding (map units) and width for the hover highlight ring.
 const RING_PAD = 4;
@@ -179,8 +234,15 @@ export function ConceptNode(props: ConceptNodeProps): JSX.Element {
   const highlight_role = createMemo(() => props.state.highlighted_concepts().get(props.conceptKey));
 
   // Base vs. origin-emphasis border. The hover highlight ring is a separate
-  // outer shape so it composes with either border.
-  const stroke_color = createMemo(() => (is_origin() ? ORIGIN_EMPHASIS.stroke : BASE_STROKE));
+  // outer shape so it composes with either border. The non-origin base border
+  // lightens in dark mode for contrast; the origin emphasis stroke (a saturated
+  // accent) is kept as authored in both themes.
+  const base_stroke = (): string => (map_is_dark() ? BASE_STROKE_DARK : BASE_STROKE);
+  // Derive label color from the bubble fill so contrast is always maximised,
+  // regardless of light/dark mode. Because fill comes from the authored palette
+  // (not a CSS variable), this is also correct in the static SVG/PNG export.
+  const label_fill = (): string => label_color_for_fill(fill());
+  const stroke_color = createMemo(() => (is_origin() ? ORIGIN_EMPHASIS.stroke : base_stroke()));
   const stroke_width = createMemo(() =>
     is_origin() ? ORIGIN_EMPHASIS.stroke_width : BASE_STROKE_WIDTH,
   );
@@ -307,7 +369,7 @@ export function ConceptNode(props: ConceptNodeProps): JSX.Element {
       <text
         x={props.box.x}
         y={props.box.y}
-        fill="#000000"
+        fill={label_fill()}
         font-family={LABEL_FONT}
         font-size={LABEL_FONT_SIZE}
         text-anchor="middle"
