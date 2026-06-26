@@ -87,6 +87,12 @@
   `docs/TROUBLESHOOTING.md`, `docs/COLOR_CONTRAST_ACCESSIBILITY.md`,
   `docs/RELEASE_HISTORY.md`; `AGENTS.md` trimmed to pointers.
 - Fixed broken doc links to deleted files.
+- `src/css/map.css`: fixed unreadable empty-state template buttons in dark mode. The
+  buttons use the fixed light-blue `--from-tint` background (no dark override), while
+  their label/desc use theme-aware text tokens that turn light in dark mode, so a light
+  label landed on a light-blue button and disappeared. Added a `[data-ui-theme="dark"]`
+  override giving the button a dark blue-tinted surface (`#22344a`) with the accent
+  border, plus a lighten-on-hover so the hover cue works on the dark surface.
 
 ### Removals and Deprecations
 
