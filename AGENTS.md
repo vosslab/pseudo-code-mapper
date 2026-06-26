@@ -8,7 +8,6 @@
 - Document every edit in docs/CHANGELOG.md.
 
 ## Running code
-- Python: `source source_me.sh && python3` (Python 3.12 only).
 - macOS Homebrew Python 3.12 modules live in /opt/homebrew/lib/python3.12/site-packages/.
 - Full TypeScript gate: `bash check_codebase.sh`. Browser tests: `bash run_playwright_tests.sh`.
 - Fast Python hygiene tests: `pytest tests/`.
