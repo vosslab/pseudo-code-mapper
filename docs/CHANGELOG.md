@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-07-02
+
+### Additions and New Features
+
+- Added `devel/clean_build.sh`, the light build cleaner wired to the `npm run clean` target. It
+  wipes build output, tool caches, and test artifacts while keeping `node_modules` (and Rust
+  `target/`) intact, so the next build is ab initio with no reinstall.
+- Updated `devel/dist_clean.sh` (the deep reset) to keep the committed `package-lock.json`, so a
+  distribution-clean checkout still drives a reproducible `npm ci`.
+- Repointed the `clean` npm alias in `package.json` from `./dist_clean.sh` to
+  `./devel/clean_build.sh`.
+
+### Removals and Deprecations
+
+- Removed the root `dist_clean.sh`; both cleaners now live only under `devel/`
+  (`devel/clean_build.sh` light, `devel/dist_clean.sh` deep).
+
+## 2026-07-01
+
+### Additions and New Features
+
+- `dist_clean.sh`: added the root-level clean front door (`rm -rf dist _site
+  *.tsbuildinfo .eslintcache`), matching the `npm run clean` alias that already
+  pointed at it. `check_codebase.sh` was already green before this change; no
+  mechanical lint/format/typecheck fixes were needed.
+
+### Fixes and Maintenance
+
+- Reformatted `src/types.ts` with `prettier --write` after the prettier 3.9.4 floor bump. The
+  fleet-wide prettier floor bump changed formatting output such that this previously-clean file
+  failed `prettier --check`. Ran `npx prettier --write '**/*.{ts,tsx,mts,cts,js,mjs,cjs}'` to
+  conform to the canonical `.prettierrc`; whitespace-only, no logic change.
+- Added the canonical `allowScripts` allow-list (esbuild + fsevents install scripts) to `package.json` to silence `npm warn allow-scripts` and match the template.
+- `package.json`: declared the previously-undeclared `playwright` devDependency
+  (`>=1.61.1`, matching the existing `@playwright/test` floor). `tools/html_to_pdf.mjs`
+  and `devel/html_to_pdf.mjs` both `import { chromium } from "playwright"` directly,
+  but nothing in `devDependencies` declared it, so any run of that tool (or
+  `build_github_pages.sh`, which uses it) threw `Cannot find package 'playwright'`.
+- `package.json`: declared the previously-undeclared transitive-only
+  `@dagrejs/graphlib` type import used by `src/layout_graph.ts`.
+- `package.json`: capped `eslint` and `@eslint/js` at `<10` (back to
+  `>=9.0.0 <10`) because `eslint-plugin-solid@0.14.5` does not support
+  eslint 10 (peer `^6 || ^7 || ^8 || ^9`), restoring `npm install`
+  resolvability.
+- `package.json`: capped `@babel/core` and `@babel/preset-typescript` at
+  `<8` (back to `>=7.0.0 <8`) because `babel-preset-solid@1.9.12` peer-requires
+  Babel `^7.0.0` and does not support Babel 8, restoring `npm install`
+  resolvability. Companion fix to the `eslint <10` cap above; both are
+  Solid-tooling major-lag pins.
+
 ## 2026-06-26
 
 ### Additions and New Features

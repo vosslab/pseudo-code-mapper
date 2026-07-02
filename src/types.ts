@@ -5,14 +5,7 @@
 // here, so it is the frozen contract for the whole codebase.
 
 export type NodeShape =
-  | "terminal"
-  | "io"
-  | "process"
-  | "decision"
-  | "loop"
-  | "subroutine"
-  | "comment"
-  | "connector";
+  "terminal" | "io" | "process" | "decision" | "loop" | "subroutine" | "comment" | "connector";
 
 export type FlowEdgeBranch = "true" | "false";
 

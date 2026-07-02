@@ -9,22 +9,23 @@
 		"build": "./build_github_pages.sh",
 		"serve": "./run_web_server.sh",
 		"check": "./check_codebase.sh",
-		"clean": "./dist_clean.sh",
+		"clean": "./devel/clean_build.sh",
 		"format:write": "npx prettier --write '**/*.{ts,tsx,mts,cts,js,mjs,cjs}'",
 		"test:playwright": "./run_playwright_tests.sh",
 		"pdf": "node tools/html_to_pdf.mjs"
 	},
 	"dependencies": {
-		"solid-js": ">=1.9.13",
+		"solid-js": ">=1.9.14",
 		"@dagrejs/dagre": ">=3.0.0",
 		"@codemirror/state": ">=6.7.0",
-		"@codemirror/view": ">=6.43.3",
+		"@codemirror/view": ">=6.43.4",
 		"@codemirror/language": ">=6.12.4",
 		"@codemirror/commands": ">=6.10.4",
 		"@lezer/highlight": ">=1.2.3"
 	},
 	"devDependencies": {
-		"@types/node": ">=26.0.1",
+		"@dagrejs/graphlib": ">=4.0.1",
+		"@types/node": ">=26.1.0",
 		"esbuild": ">=0.28.1",
 		"esbuild-plugin-solid": ">=0.6.0",
 		"@babel/core": ">=7.0.0 <8",
@@ -33,11 +34,17 @@
 		"typescript": ">=6.0.3",
 		"eslint": ">=9.0.0 <10",
 		"@eslint/js": ">=9.0.0 <10",
-		"typescript-eslint": ">=8.62.0",
+		"typescript-eslint": ">=8.62.1",
 		"eslint-plugin-solid": ">=0.14.5",
 		"globals": ">=17.7.0",
-		"prettier": ">=3.8.5",
+		"prettier": ">=3.9.4",
 		"tsx": ">=4.22.4",
-		"@playwright/test": ">=1.61.1"
+		"@playwright/test": ">=1.61.1",
+		"playwright": ">=1.61.1"
+	},
+	"allowScripts": {
+		"esbuild@0.28.1": true,
+		"fsevents@2.3.2": true,
+		"fsevents@2.3.3": true
 	}
 }
